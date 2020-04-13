@@ -11,6 +11,8 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using Astronomical_Learning.Models;
+using SendGrid.Helpers.Mail;
+using SendGrid;
 
 namespace Astronomical_Learning
 {
@@ -19,9 +21,27 @@ namespace Astronomical_Learning
         public Task SendAsync(IdentityMessage message)
         {
             // Plug in your email service here to send an email.
-            return Task.FromResult(0);
+            return ConfigSendGridasync(message);
         }
+
+        private async Task ConfigSendGridasync(IdentityMessage message)
+        {
+            var myMessage = new SendGridMessage();
+
+            myMessage.AddTo(message.Destination);
+            myMessage.SetFrom(new EmailAddress("Astronomical-noreply@gmail.com", "Astronomical"));
+            myMessage.SetSubject(message.Subject);
+            myMessage.AddContent(MimeType.Text, message.Body);
+            myMessage.AddContent(MimeType.Html, message.Body);
+
+            string apiKey = "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";
+            var client = new SendGridClient(apiKey);
+
+            var response = await client.SendEmailAsync(myMessage);
+        } 
     }
+
+    //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
 
     public class SmsService : IIdentityMessageService
     {
